@@ -1,0 +1,33 @@
+# Render Blueprint — deploys the backend as its own web service from
+# the /backend folder of this repo. See render.com/docs/blueprint-spec.
+#
+# To use: in the Render dashboard, New + -> Blueprint -> point at this
+# repo. Render finds this file automatically if it lives at the repo
+# root; since it lives in /backend, use rootDir (already set below) or
+# copy this file to the repo root — either works.
+#
+# NOTE on persistence: Render's free plan does not support a persistent
+# disk, so the SQLite file (and all ticket data) is wiped on every
+# redeploy or restart. The 'starter' plan below adds a real disk. If
+# you want to stay on the free plan while testing, remove the 'disk'
+# block and accept that data won't survive a redeploy.
+
+services:
+  - type: web
+    name: apartment-ticket-backend
+    runtime: node
+    rootDir: backend
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_ORIGIN
+        value: https://YOUR_GITHUB_USERNAME.github.io
+      - key: DB_PATH
+        value: /var/data/tickets.db
+    disk:
+      name: ticket-data
+      mountPath: /var/data
+      sizeGB: 1
